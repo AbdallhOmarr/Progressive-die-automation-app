@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports SolidWorks.Interop
 Imports SolidWorks.Interop.sldworks
 Imports SolidWorks.Interop.swconst
 Public Class Form1
@@ -154,14 +155,14 @@ Public Class Form1
             Next
 
 
-            For i As Integer = 0 To FeatureCount - 1
-                Dim Index As Integer = -1
-                Index = FeatNames(i).IndexOf("Edge-Flange")
-                If Index >= 0 Then
-                    SketchedBend(SketchedBendCount) = FeatNames(i)
-                    SketchedBendCount = SketchedBendCount + 1
-                End If
-            Next
+            'For i As Integer = 0 To FeatureCount - 1
+            '    Dim Index As Integer = -1
+            '    Index = FeatNames(i).IndexOf("Edge-Flange")
+            '    If Index >= 0 Then
+            '        SketchedBend(SketchedBendCount) = FeatNames(i)
+            '        SketchedBendCount = SketchedBendCount + 1
+            '    End If
+            'Next
 
 
             ListBox1.Items.Add("-----------------")
@@ -180,8 +181,26 @@ Public Class Form1
                     Console.WriteLine(subFeature)
                     Do While Not subFeature Is Nothing
                         ' Print the name of the sub-feature
-                        Console.WriteLine(subFeature.Name)
+                        Console.WriteLine("Feature Name:" & subFeature.Name & " Feature Type: " & subFeature.GetType().Name)
+                        'If subFeature.Name.Contains("Bend") And subFeature.Name.Contains("Lines") Then
+
+                        '    Dim bendLinesFeature As = CType(subFeature.GetSpecificFeature2(), SketchSegment)
+
+                        '    Dim bendLines As Object = bendLinesFeature.GetBendLines
+
+                        '    For i As Integer = 0 To UBound(bendLines)
+                        '        Dim bendLine As SketchLine = CType(bendLines(i), SketchLine)
+                        '        Dim startPoint As Double() = bendLine.StartPoint
+                        '        Dim endPoint As Double() = bendLine.EndPoint
+                        '        Dim length As Double = bendLine.Length
+                        '        Console.WriteLine("Bend line " & (i + 1) & ": Start point=(" & startPoint(0) & "," & startPoint(1) & "), End point=(" & endPoint(0) & "," & endPoint(1) & "), Length=" & length)
+                        '    Next
+
+                        'End If
                         If subFeature.Name.Contains("Bend") And Not subFeature.Name.Contains("Lines") Then
+                            SketchedBend(SketchedBendCount) = FeatNames(bendCount)
+                            SketchedBendCount = SketchedBendCount + 1
+
                             bendCount += 1
                         End If
                         ' Get the next sub-feature of the parent feature
@@ -286,8 +305,9 @@ Public Class Form1
             While SketchCounter < SearchesNumber
 
                 Flag = 1
-
+                'selecting entity and if it selected will return True 
                 State = Part.Extension.SelectByID2("Model", "SKETCH", 0, 0, 0, False, 0, Nothing, 0)
+
                 ModelState = Part.Extension.SelectByID2("Model", "SKETCH", 0, 0, 0, False, 0, Nothing, 0)
                 Console.WriteLine("state")
                 Console.WriteLine(State)
@@ -323,19 +343,28 @@ Public Class Form1
 
                 If Flag = 0 Then
 
+                    'edit sketch 
                     Part.EditSketch()
+                    'clear selection
                     Part.ClearSelection2(True)
-
+                    'getting active sketch to access its segments(lines,circles,..)
                     Sketch = Part.GetActiveSketch2()
+                    'getting sketch segment
                     SketchSegmentArray = Sketch.GetSketchSegments
 
-                    Dim LinePointsArray(4) As Double
-                    Dim ConstructionLinePointsArray(4) As Double
-                    Dim CirclePointsArray(2) As Double
-                    Dim Radius As Double = 0
-                    Dim ArcPointsArray(6) As Double
+                    'arrays to save line with startpoint and end point
+                    Dim LinePointsArray(5) As Double
 
+                    Dim ConstructionLinePointsArray(5) As Double
+                    'array to save circle center point(x,y)
+                    Dim CirclePointsArray(2) As Double
+                    'array to store radius of array
+                    Dim Radius As Double = 0
+
+                    Dim ArcPointsArray(6) As Double
+                    'array 
                     Dim PointArray As System.Object
+                    'sketch segment
                     Dim SelectedSegment As SketchSegment
                     Dim SelectedLine As SketchLine
                     Dim SelectedArc As SketchArc
@@ -343,6 +372,7 @@ Public Class Form1
                     If Not IsNothing(SketchSegmentArray) Then
                         For Each SegmentCounter In SketchSegmentArray
                             CurrentSketchSegment = SegmentCounter
+                            Console.WriteLine(CurrentSketchSegment.GetType)
                             If swSketchSegments_e.swSketchLINE = CurrentSketchSegment.GetType Then
                                 LinesNumber = LinesNumber + 1
                             End If
@@ -372,10 +402,12 @@ Public Class Form1
                                 PointArray = SelectedLine.GetEndPoint()
                                 LinePointsArray(2) = Math.Round(PointArray(0) * 1000, 1, MidpointRounding.AwayFromZero)
                                 LinePointsArray(3) = Math.Round(PointArray(1) * 1000, 1, MidpointRounding.AwayFromZero)
+                                Console.WriteLine("Line Length")
+                                LinePointsArray(4) = SelectedLine.GetLength * 1000
 
-                                ListBox1.Items.Add("Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3))
+                                ListBox1.Items.Add("Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4))
 
-                                File.AppendAllText(PartName, "Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & System.Environment.NewLine)
+                                File.AppendAllText(PartName, "Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4) & System.Environment.NewLine)
 
                                 SelectedLines = SelectedLines + 1
                             End If
@@ -387,10 +419,11 @@ Public Class Form1
                                 PointArray = SelectedLine.GetEndPoint()
                                 ConstructionLinePointsArray(2) = Math.Round(PointArray(0) * 1000, 1, MidpointRounding.AwayFromZero)
                                 ConstructionLinePointsArray(3) = Math.Round(PointArray(1) * 1000, 1, MidpointRounding.AwayFromZero)
+                                Console.WriteLine("Z: " & PointArray(2))
+                                ListBox1.Items.Add("ConstructionLine " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4))
 
-                                ListBox1.Items.Add("ConstructionLine " & ConstructionLinePointsArray(0) & " " & ConstructionLinePointsArray(1) & " " & ConstructionLinePointsArray(2) & " " & ConstructionLinePointsArray(3))
+                                File.AppendAllText(PartName, "ConstructionLine " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4) & System.Environment.NewLine)
 
-                                File.AppendAllText(PartName, "ConstructionLine " & ConstructionLinePointsArray(0) & " " & ConstructionLinePointsArray(1) & " " & ConstructionLinePointsArray(2) & " " & ConstructionLinePointsArray(3) & System.Environment.NewLine)
 
                                 SelectedLines = SelectedLines + 1
                             End If

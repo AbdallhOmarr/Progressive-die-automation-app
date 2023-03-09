@@ -154,22 +154,22 @@ Public Class Form1
                 ListBox1.Items.Add(FeatNames(i))
             Next
 
+            Dim bendCount As Integer = 0
 
-            'For i As Integer = 0 To FeatureCount - 1
-            '    Dim Index As Integer = -1
-            '    Index = FeatNames(i).IndexOf("Edge-Flange")
-            '    If Index >= 0 Then
-            '        SketchedBend(SketchedBendCount) = FeatNames(i)
-            '        SketchedBendCount = SketchedBendCount + 1
-            '    End If
-            'Next
+            For i As Integer = 0 To FeatureCount - 1
+                If FeatNames(i).Contains("Flange") Then
+                    SketchedBend(SketchedBendCount) = FeatNames(i)
+                    SketchedBendCount = SketchedBendCount + 1
+                    bendCount += 1
+
+                End If
+            Next
 
 
             ListBox1.Items.Add("-----------------")
 
 
             'model doc > first feature > 
-            Dim bendCount As Integer = 0
             Dim feat As Feature = Part.FirstFeature
             Do While Not feat Is Nothing
                 'Do something with the feature
@@ -182,28 +182,14 @@ Public Class Form1
                     Do While Not subFeature Is Nothing
                         ' Print the name of the sub-feature
                         Console.WriteLine("Feature Name:" & subFeature.Name & " Feature Type: " & subFeature.GetType().Name)
-                        'If subFeature.Name.Contains("Bend") And subFeature.Name.Contains("Lines") Then
 
-                        '    Dim bendLinesFeature As = CType(subFeature.GetSpecificFeature2(), SketchSegment)
+                        'If subFeature.Name.Contains("Bend") And Not subFeature.Name.Contains("Lines") Then
+                        '    SketchedBend(SketchedBendCount) = FeatNames(bendCount)
+                        '    SketchedBendCount = SketchedBendCount + 1
 
-                        '    Dim bendLines As Object = bendLinesFeature.GetBendLines
-
-                        '    For i As Integer = 0 To UBound(bendLines)
-                        '        Dim bendLine As SketchLine = CType(bendLines(i), SketchLine)
-                        '        Dim startPoint As Double() = bendLine.StartPoint
-                        '        Dim endPoint As Double() = bendLine.EndPoint
-                        '        Dim length As Double = bendLine.Length
-                        '        Console.WriteLine("Bend line " & (i + 1) & ": Start point=(" & startPoint(0) & "," & startPoint(1) & "), End point=(" & endPoint(0) & "," & endPoint(1) & "), Length=" & length)
-                        '    Next
-
+                        '    bendCount += 1
                         'End If
-                        If subFeature.Name.Contains("Bend") And Not subFeature.Name.Contains("Lines") Then
-                            SketchedBend(SketchedBendCount) = FeatNames(bendCount)
-                            SketchedBendCount = SketchedBendCount + 1
-
-                            bendCount += 1
-                        End If
-                        ' Get the next sub-feature of the parent feature
+                        '' Get the next sub-feature of the parent feature
                         subFeature = subFeature.GetNextSubFeature
 
                     Loop
@@ -405,9 +391,9 @@ Public Class Form1
                                 Console.WriteLine("Line Length")
                                 LinePointsArray(4) = SelectedLine.GetLength * 1000
 
-                                ListBox1.Items.Add("Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4))
+                                ListBox1.Items.Add("Line " & "P1 =(" & LinePointsArray(0) & "," & LinePointsArray(1) & ") P2 =(" & LinePointsArray(2) & "," & LinePointsArray(3) & ") L =" & LinePointsArray(4))
 
-                                File.AppendAllText(PartName, "Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4) & System.Environment.NewLine)
+                                File.AppendAllText(PartName, "Line " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & System.Environment.NewLine)
 
                                 SelectedLines = SelectedLines + 1
                             End If
@@ -420,9 +406,9 @@ Public Class Form1
                                 ConstructionLinePointsArray(2) = Math.Round(PointArray(0) * 1000, 1, MidpointRounding.AwayFromZero)
                                 ConstructionLinePointsArray(3) = Math.Round(PointArray(1) * 1000, 1, MidpointRounding.AwayFromZero)
                                 Console.WriteLine("Z: " & PointArray(2))
-                                ListBox1.Items.Add("ConstructionLine " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4))
+                                ListBox1.Items.Add("ConstructionLine " & "P1 =(" & LinePointsArray(0) & "," & LinePointsArray(1) & ") P2 =(" & LinePointsArray(2) & "," & LinePointsArray(3) & ") L =" & LinePointsArray(4))
 
-                                File.AppendAllText(PartName, "ConstructionLine " & LinePointsArray(0) & " " & LinePointsArray(1) & " " & LinePointsArray(2) & " " & LinePointsArray(3) & " " & LinePointsArray(4) & System.Environment.NewLine)
+                                File.AppendAllText(PartName, "ConstructionLine " & ConstructionLinePointsArray(0) & " " & ConstructionLinePointsArray(1) & " " & ConstructionLinePointsArray(2) & " " & ConstructionLinePointsArray(3) & System.Environment.NewLine)
 
 
                                 SelectedLines = SelectedLines + 1
@@ -470,7 +456,7 @@ Public Class Form1
                                     Radius = SelectedArc.GetRadius()
                                     CirclePointsArray(2) = Math.Round(Radius * 1000, 1, MidpointRounding.AwayFromZero)
 
-                                    ListBox1.Items.Add("Circle " & CirclePointsArray(0) & " " & CirclePointsArray(1) & " " & CirclePointsArray(2))
+                                    ListBox1.Items.Add("Circle P =(" & CirclePointsArray(0) & "," & CirclePointsArray(1) & ") R =" & CirclePointsArray(2))
 
                                     File.AppendAllText(PartName, "Circle " & CirclePointsArray(0) & " " & CirclePointsArray(1) & " " & CirclePointsArray(2) & System.Environment.NewLine)
                                 End If
@@ -482,7 +468,7 @@ Public Class Form1
                                     Radius = SelectedArc.GetRadius()
                                     CirclePointsArray(2) = Math.Round(Radius * 1000, 1, MidpointRounding.AwayFromZero)
 
-                                    ListBox1.Items.Add("ConstructionCircle " & CirclePointsArray(0) & " " & CirclePointsArray(1) & " " & CirclePointsArray(2))
+                                    ListBox1.Items.Add("ConstructionCircle P =(" & CirclePointsArray(0) & "," & CirclePointsArray(1) & ") R =" & CirclePointsArray(2))
 
                                     File.AppendAllText(PartName, "ConstructionCircle " & CirclePointsArray(0) & " " & CirclePointsArray(1) & " " & CirclePointsArray(2) & System.Environment.NewLine)
                                 End If
@@ -500,7 +486,7 @@ Public Class Form1
                                     ArcPointsArray(4) = Math.Round(PointArray(0) * 1000, 1, MidpointRounding.AwayFromZero)
                                     ArcPointsArray(5) = Math.Round(PointArray(1) * 1000, 1, MidpointRounding.AwayFromZero)
 
-                                    ListBox1.Items.Add("Arc " & ArcPointsArray(0) & " " & ArcPointsArray(1) & " " & ArcPointsArray(2) & " " & ArcPointsArray(3) & " " & ArcPointsArray(4) & " " & ArcPointsArray(5))
+                                    ListBox1.Items.Add("Arc CP =(" & ArcPointsArray(0) & "," & ArcPointsArray(1) & ") P1 =(" & ArcPointsArray(2) & "," & ArcPointsArray(3) & ") P2 =(" & ArcPointsArray(4) & "," & ArcPointsArray(5) & ")")
 
                                     File.AppendAllText(PartName, "Arc " & ArcPointsArray(0) & " " & ArcPointsArray(1) & " " & ArcPointsArray(2) & " " & ArcPointsArray(3) & " " & ArcPointsArray(4) & " " & ArcPointsArray(5) & System.Environment.NewLine)
                                 End If
@@ -517,7 +503,7 @@ Public Class Form1
                                     ArcPointsArray(4) = Math.Round(PointArray(0) * 1000, 1, MidpointRounding.AwayFromZero)
                                     ArcPointsArray(5) = Math.Round(PointArray(1) * 1000, 1, MidpointRounding.AwayFromZero)
 
-                                    ListBox1.Items.Add("ConstructionArc " & ArcPointsArray(0) & " " & ArcPointsArray(1) & " " & ArcPointsArray(2) & " " & ArcPointsArray(3) & " " & ArcPointsArray(4) & " " & ArcPointsArray(5))
+                                    ListBox1.Items.Add("ConstructionArc CP =(" & ArcPointsArray(0) & "," & ArcPointsArray(1) & ") P1 =(" & ArcPointsArray(2) & "," & ArcPointsArray(3) & ") P2 =(" & ArcPointsArray(4) & "," & ArcPointsArray(5) & ")")
 
                                     File.AppendAllText(PartName, "ConstructionArc " & ArcPointsArray(0) & " " & ArcPointsArray(1) & " " & ArcPointsArray(2) & " " & ArcPointsArray(3) & " " & ArcPointsArray(4) & " " & ArcPointsArray(5) & System.Environment.NewLine)
                                 End If

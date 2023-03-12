@@ -624,4 +624,52 @@ Public Class Form1
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
 
     End Sub
+
+    Private Sub TabPage1_Click(sender As Object, e As EventArgs) Handles TabPage1.Click
+
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        '1. open file dialog and choose step file location
+        '2. declare matrix to store the data in it
+        Dim filePath As String
+        Dim FileBrowser As FileDialog = New OpenFileDialog()
+        FileBrowser.Title = "Open STEP File"
+        FileBrowser.InitialDirectory = "D:\"
+        FileBrowser.Filter = "SLDPRT files (*.STEP)|*.STEP|All files (*.*)|*.*"
+        If FileBrowser.ShowDialog() = DialogResult.OK Then
+            filePath = FileBrowser.FileName
+        End If
+
+        Dim stepReader As Object = New ReadStepClass
+        Dim matrix As Object(,)
+
+        matrix = stepReader.ReadMatrixFromFile(filePath)
+
+        filePath = Path.ChangeExtension(filePath, "txt")
+
+        stepReader.WriteMatrixToFile(filePath, matrix)
+
+        Dim closedShell As String = stepReader.GetClosedShel(filePath)
+
+        Console.WriteLine(closedShell)
+        MsgBox(filePath)
+        MsgBox(closedShell)
+        Dim faces As String() = stepReader.GetAdvancedFaces(closedShell, filePath)
+
+        For Each face In faces
+            Dim savedPath As String = "C:\Users\user\source\repos\Progressive-die-automation-app\data\" & face & ".txt"
+            Dim boundries As String() = stepReader.getBoundry(face, filePath, savedPath)
+
+        Next
+        '    Public Shared Function GetEdgeLoop(ByVal AdvancedFaceFilePath As String, ByVal FilePath As String)
+        Dim folderPath As String = "C:\Users\user\source\repos\Progressive-die-automation-app\data"
+        Dim files() As String = Directory.GetFiles(folderPath, "*.txt")
+
+        For Each filePath1 As String In files
+            stepReader.GetEdgeLoop(filePath1, filePath)
+        Next
+
+
+    End Sub
 End Class

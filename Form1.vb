@@ -630,15 +630,23 @@ Public Class Form1
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        Dim folderPath1 As String = "C:\Users\user\source\repos\Progressive-die-automation-app\data"
+
+        For Each fil As String In System.IO.Directory.GetFiles(folderPath1)
+            System.IO.File.Delete(fil)
+        Next
+
         '1. open file dialog and choose step file location
         '2. declare matrix to store the data in it
         Dim filePath As String
+        Dim stepFilePath As String
         Dim FileBrowser As FileDialog = New OpenFileDialog()
         FileBrowser.Title = "Open STEP File"
         FileBrowser.InitialDirectory = "D:\"
         FileBrowser.Filter = "SLDPRT files (*.STEP)|*.STEP|All files (*.*)|*.*"
         If FileBrowser.ShowDialog() = DialogResult.OK Then
             filePath = FileBrowser.FileName
+            stepFilePath = FileBrowser.FileName
         End If
 
         Dim stepReader As Object = New ReadStepClass
@@ -667,9 +675,28 @@ Public Class Form1
         Dim files() As String = Directory.GetFiles(folderPath, "*.txt")
 
         For Each filePath1 As String In files
+
             stepReader.GetEdgeLoop(filePath1, filePath)
+
+        Next
+        For Each filePath1 As String In files
+            stepReader.GetOrientedEdge(filePath1, filePath)
         Next
 
+        For Each filePath1 As String In files
+            stepReader.GetEdgeCurve(filePath1, filePath)
+        Next
+
+        For Each filePath1 As String In files
+            stepReader.GetVertexPoint(filePath1, filePath)
+        Next
+
+        For Each filePath1 As String In files
+            stepReader.GetCart(filePath1, stepFilePath)
+        Next
+        For Each filePath1 As String In files
+            stepReader.GetCartinLine(filePath1, stepFilePath)
+        Next
 
     End Sub
 End Class
